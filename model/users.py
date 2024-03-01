@@ -22,7 +22,7 @@ class Post(db.Model):
     # Define a relationship in Notes Schema to userID who originates the note, many-to-one (many notes to one user)
     userID = db.Column(db.Integer, db.ForeignKey('users.id'))
     food = db.Column(db.Text, unique=False)
-
+    favorite = db.Column(db.Text, unique=False)
 
     # Constructor of a Notes object, initializes of instance variables within object
     def __init__(self, id, note, image):
@@ -83,12 +83,13 @@ class User(db.Model):
     _hashmap = db.Column(db.JSON, unique=False, nullable=True)
     _role = db.Column(db.String(20), default="User", nullable=False)
     _food = db.Column(db.String(255), unique=False, nullable=False)
+    _favorite = db.Column(db.String(255), unique=False, nullable=False)
 
     # Defines a relationship between User record and Notes table, one-to-many (one user to many notes)
     posts = db.relationship("Post", cascade='all, delete', backref='users', lazy=True)
 
     # constructor of a User object, initializes the instance variables within object (self)
-    def __init__(self, name, uid, password="123qwerty", dob=date.today(), hashmap={}, role="User", food = "guac"):
+    def __init__(self, name, uid, password="123qwerty", dob=date.today(), hashmap={}, role="User", food = "guac", favorite = "1"):
         self._name = name    # variables with self prefix become part of the object, 
         self._uid = uid
         self.set_password(password)
@@ -96,6 +97,7 @@ class User(db.Model):
         self._hashmap = hashmap
         self._role = role
         self._food = food
+        self.favorite = favorite
 
 
     # a name getter method, extracts name from object
@@ -115,6 +117,14 @@ class User(db.Model):
     @food.setter
     def food(self, food):
         self._food = food
+    
+    @property
+    def favorite(self):
+        return self._favorite
+    
+    @favorite.setter
+    def favorite(self, favorite):
+        self._favorite = favorite
     
     # a getter method, extracts email from object
     @property
@@ -208,13 +218,14 @@ class User(db.Model):
             "dob": self.dob,
             "age": self.age,
             "hashmap": self._hashmap,
-            "food": self.food
+            "food": self.food,
+            "favorite": self.favorite
             # "posts": [post.read() for post in self.posts]
         }
 
     # CRUD update: updates user name, password, phone
     # returns self
-    def update(self, name="", uid="", password=""):
+    def update(self, name="", uid="", password="", favorite=""):
         """only updates values with length"""
         if len(name) > 0:
             self.name = name
@@ -222,6 +233,8 @@ class User(db.Model):
             self.uid = uid
         if len(password) > 0:
             self.set_password(password)
+        if len(favorite) > 0:
+            self.favorite = favorite
         db.session.commit()
         return self
 
@@ -242,11 +255,11 @@ def initUsers():
         """Create database and tables"""
         db.create_all()
         """Tester data for table"""
-        u1 = User(name='Thomas Edison', uid='toby', password='123toby', dob=date(1847, 2, 11), hashmap={"job": "inventor", "company": "GE"}, food="numnums", role="Admin")
-        u2 = User(name='Nicholas Tesla', uid='niko', password='123niko', dob=date(1856, 7, 10), hashmap={"job": "inventor", "company": "Tesla"}, food="electricity")
-        u3 = User(name='Alexander Graham Bell', uid='lex', hashmap={"job": "inventor", "company": "ATT"}, food="iphones")
-        u4 = User(name='Grace Hopper', uid='hop', password='123hop', dob=date(1906, 12, 9), hashmap={"job": "inventor", "company": "Navy"}, food="slop")
-        u5 = User(name='Sai Talisetty', uid='sai', password='123sai', dob=date(2008, 6, 9), hashmap={"job": "football player", "company": "Seattle Seahawks"}, food="Annie's bunny gummies")
+        u1 = User(name='Tommy boy', uid='tommy', password='123toby', dob=date(1847, 2, 11), hashmap={"job": "inventor", "company": "GE"}, food="numnums", role="User", favorite="1")
+        u2 = User(name='Nick Her', uid='niko', password='123niko', dob=date(1856, 7, 10), hashmap={"job": "inventor", "company": "Tesla"}, food="electricity", role="User", favorite="1")
+        u3 = User(name='Alexi', uid='A-Rod', hashmap={"job": "inventor", "company": "ATT"}, food="iphones", role="User", favorite="1")
+        u4 = User(name='Simba Lion', uid='simba', password='123simba', dob=date(1906, 12, 9), hashmap={"job": "inventor", "company": "Navy"}, food="slop", role="User", favorite="1")
+        u5 = User(name='Sai Talisetty', uid='sai', password='123sai', dob=date(2008, 6, 9), hashmap={"job": "football player", "company": "Seattle Seahawks"}, food="Annie's bunny gummies", favorite="1")
 
         users = [u1, u2, u3, u4, u5]
 

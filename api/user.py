@@ -60,7 +60,30 @@ class UserAPI:
             users = User.query.all()    # read/extract all users from database
             json_ready = [user.read() for user in users]  # prepare output in json
             return jsonify(json_ready)  # jsonify creates Flask response object, more specific to APIs than json.dumps
-   
+        
+        @token_required()
+        def put(self, _):
+            body = request.get_json() # get the body of the request
+            token=request.cookies.get("jwt")
+            cur_user=jwt.decode(token,current_app.config["SECRET_KEY"], algorithms=["HS256"]) ['_uid']
+            uid = body.get('uid')
+            name = body.get('name')
+            password = body.get('password')
+            favorite = body.get('favorite')
+            users = User.query.all()
+            for user in users:
+                if user.uid == cur_user:
+                    if uid == None:
+                        uid = user.uid
+                    if name == None:
+                        name = user.name
+                    if password == None:
+                        password = user.password
+                    if favorite == None:
+                        favorite = user.favorite
+                    user.update(name,uid,password, favorite)
+            return f"{user.read()} Updated"
+        
         @token_required("Admin")
         def delete(self, _): # Delete Method
             body = request.get_json()
@@ -72,7 +95,26 @@ class UserAPI:
             user.delete() 
             # 204 is the status code for delete with no json response
             return f"Deleted user: {json}", 204 # use 200 to test with Postman
-         
+        
+    class PrivateFunctions(Resource):
+        @token_required()
+        def get(self, _):
+            # print("here-------------------------------------------------------------------------"
+            token=request.cookies.get("jwt")
+            
+            cur_user=jwt.decode(token,current_app.config["SECRET_KEY"], algorithms=["HS256"]) ['_uid']
+            
+            print(cur_user)
+            # print("here-------------------------------------------------------------------------")
+            users = User.query.all()    # read/extract all users from database
+            for user in users:
+                print("here1")
+                if(user.read()['uid']==cur_user):
+                    print("here")
+                    return jsonify(user.read()['favorite'])
+            return jsonify("1")
+            
+            
     class _Security(Resource):
         def post(self):
             try:
@@ -131,5 +173,6 @@ class UserAPI:
             
     # building RESTapi endpoint
     api.add_resource(_CRUD, '/')
+    api.add_resource(PrivateFunctions,'/private')
     api.add_resource(_Security, '/authenticate')
     
