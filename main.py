@@ -16,9 +16,12 @@ from api.user import user_api # Blueprint import api definition
 from api.player import player_api
 from api.titanic import titanic_api
 from api.NFL import NFL_api
+from api.experiment import experiment_api
+from api.CPT import CPT_api
 # database migrations
 from model.users import initUsers
 from model.players import initPlayers
+from model.CPTmodel import initNFL
 
 # setup App pages
 from projects.projects import app_projects # Blueprint directory import projects definition
@@ -35,6 +38,8 @@ app.register_blueprint(player_api)
 app.register_blueprint(app_projects) # register app pages
 app.register_blueprint(titanic_api)
 app.register_blueprint(NFL_api)
+app.register_blueprint(CPT_api)
+app.register_blueprint(experiment_api)
 
 @app.errorhandler(404)  # catch for URL not found
 def page_not_found(e):
@@ -64,6 +69,7 @@ custom_cli = AppGroup('custom', help='Custom commands')
 def generate_data():
     initUsers()
     initPlayers()
+    initNFL()
 
 # Register the custom command group with the Flask application
 app.cli.add_command(custom_cli)

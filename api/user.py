@@ -12,6 +12,9 @@ user_api = Blueprint('user_api', __name__,
 # API docs https://flask-restful.readthedocs.io/en/latest/api.html
 api = Api(user_api)
 
+dict1 = {'Team': 'Seahawks', 'League': 'NFL', 'Player':'DK Metcalf'}
+dict2 = {'Game':'GUI', 'FavID':'5'}
+
 class UserAPI:        
     class _CRUD(Resource):  # User API operation for Create, Read.  THe Update, Delete methods need to be implemeented
         def post(self): # Create method
